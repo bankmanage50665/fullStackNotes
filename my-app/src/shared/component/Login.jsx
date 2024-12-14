@@ -58,14 +58,20 @@ export async function action({ request, params }) {
   };
 
   try {
-    const res = await fetch("http://localhost/users/login", {
-      method: "POST",
-      body: JSON.stringify(userData),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const res = await fetch(
+      `${process.env.REACT_APP_BACKEND_URL}/users/login`,
+      {
+        method: "POST",
+        body: JSON.stringify(userData),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
     const resData = await res.json();
+
+    console.log(resData);
+    
 
     if (!res.ok) {
       throw new Error(resData.message || "Field to loging user.");

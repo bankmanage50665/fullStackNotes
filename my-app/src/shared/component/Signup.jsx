@@ -82,13 +82,16 @@ export async function action({ request, params }) {
   };
 
   try {
-    const res = await fetch("http://localhost/users/signup", {
-      method: "POST",
-      body: JSON.stringify(userData),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const res = await fetch(
+      `${process.env.REACT_APP_BACKEND_URL}/users/signup`,
+      {
+        method: "POST",
+        body: JSON.stringify(userData),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
     const resData = await res.json();
 
     if (!res.ok) {
