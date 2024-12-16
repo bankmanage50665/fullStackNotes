@@ -1,36 +1,32 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const path = require("path");
+const cors = require("cors");
 
 const userRouter = require("./routes/user_routes");
 const notesRouter = require("./routes/notes_routes");
+const questionRoutes = require("./routes/questionsRoute");
 
-const url =
-  "mongodb+srv://rahul1234:lfn7FV0jHIg7CMWC@cluster0.wdrbduw.mongodb.net/notes?retryWrites=true&w=majority&appName=Cluster0";
+const url = `mongodb+srv://${process.env.DB_USER_NAME}:${process.env.DB_USER_PASSWORD}@cluster0.wdrbduw.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority&appName=Cluster0`;
 
 app.use(bodyParser.json());
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*"),
-    res.setHeader(
-      "Access-Control-Allow-Methods",
-      "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-    ),
-    res.setHeader(
-      "Access-Control-Allow-Headers",
-      "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-    );
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200); // End the request with a 200 status for preflight
-  }
 
-  next();
-});
+app.use(
+  cors({
+    origin: "https://notes-cc073.web.app", // Add both production and local URLs
+    // origin: "http://localhost:3001", // Add both production and local URLs
+    credentials: true,
+  })
+);
 
 app.use("/uploads/images", express.static(path.join("uploads", "images")));
+
 app.use("/users", userRouter);
 app.use("/notes", notesRouter);
+app.use(questionRoutes);
 
 app.use((req, res, next) => {
   const error = new HttpError("Could not find this route", 404);
@@ -47,10 +43,12 @@ app.use((err, req, res, next) => {
   });
 });
 
+const PORT = process.env.PORT || 3000;
+
 mongoose
   .connect(url)
   .then((req, res) => {
-    app.listen(80);
+    app.listen(PORT);
   })
   .catch((err) => {
     console.log(err);
