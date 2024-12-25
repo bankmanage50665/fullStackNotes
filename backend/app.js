@@ -16,8 +16,8 @@ app.use(bodyParser.json());
 
 app.use(
   cors({
-    // origin: "https://notes-cc073.web.app", // Add both production and local URLs
-    origin: "http://localhost:3001", // Add both production and local URLs
+    origin: "https://notes-cc073.web.app", // Add both production and local URLs
+    // origin: "http://localhost:3001", // Add both production and local URLs
     credentials: true,
   })
 );
