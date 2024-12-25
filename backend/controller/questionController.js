@@ -54,7 +54,10 @@ async function getQuestions(req, res, next) {
     if (exam) filter.exam = exam;
 
     const questions = await Question.find(filter);
-    res.json({questions});
+
+    console.log(questions);
+
+    res.json({ questions });
   } catch (error) {
     res.status(500).json({
       error: error.message,
