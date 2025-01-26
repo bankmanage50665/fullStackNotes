@@ -1,9 +1,14 @@
 import React, { useState } from "react";
+import { useLoaderData, useNavigate, useParams } from "react-router-dom";
+import { ThreeDot } from "react-loading-indicators";
 
 const UpdateQuiz = () => {
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState([""]);
   const [correctAnswer, setCorrectAnswer] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isUpdateing, setIsUpdating] = useState(false);
+
   const [additionalFields, setAdditionalFields] = useState({
     board: "",
     class: "",
@@ -11,6 +16,12 @@ const UpdateQuiz = () => {
     topic: "",
     exam: "",
   });
+  const fetchedQuestions = useLoaderData();
+
+  console.log(fetchedQuestions.question);
+
+  const sp = useParams().id;
+  const navigate = useNavigate();
 
   const addOption = () => {
     setOptions([...options, ""]);
@@ -48,10 +59,8 @@ const UpdateQuiz = () => {
       ...additionalFields,
     };
 
-    console.log(correctAnswer);
-
     const response = await fetch(
-      `${process.env.REACT_APP_BACKEND_URL}/questions`,
+      setIsUpdating(true)`${process.env.REACT_APP_BACKEND_URL}/questions`,
       {
         method: "POST",
         headers: {
@@ -61,10 +70,7 @@ const UpdateQuiz = () => {
       }
     );
     const resData = await response.json();
-
-    console.log(resData);
-
-    // console.log("Question Data:", questionData);
+    setIsUpdating(false);
 
     // Reset form after submission
     setQuestion("");
@@ -79,18 +85,32 @@ const UpdateQuiz = () => {
     });
   };
 
+  async function handleDelete() {
+    setIsLoading(true);
+    const response = await fetch(
+      `${process.env.REACT_APP_BACKEND_URL}/questions/${sp}`,
+      {
+        method: "DELETE",
+      }
+    );
+    const resData = await response.json();
+
+    setIsLoading(false);
+    navigate("/");
+  }
+
   return (
     <div className="max-w-2xl mx-auto p-4 border rounded">
-      <h2 className="text-xl font-bold mb-4">Question Creator</h2>
+      <h2 className="text-xl font-bold mb-4 text-center">Update Question</h2>
 
       <div className="space-y-4">
         {/* Question Input */}
         <input
           type="text"
           placeholder="Enter Question"
-          value={question}
           onChange={(e) => setQuestion(e.target.value)}
           className="w-full p-2 border rounded"
+          defaultValue={fetchedQuestions ? fetchedQuestions.question : null}
         />
 
         {/* Options Inputs */}
@@ -100,9 +120,11 @@ const UpdateQuiz = () => {
               <input
                 type="text"
                 placeholder={`Option ${index + 1}`}
-                value={option}
                 onChange={(e) => handleOptionChange(index, e.target.value)}
                 className="flex-grow p-2 border rounded"
+                defaultValue={
+                  fetchedQuestions ? fetchedQuestions.options : null
+                }
               />
               <input
                 type="radio"
@@ -116,7 +138,17 @@ const UpdateQuiz = () => {
                   onClick={() => removeOption(index)}
                   className="bg-red-500 text-white p-2 rounded"
                 >
-                  Delete
+                  {isLoading ? (
+                    <ThreeDot
+                      variant="bounce"
+                      color="#32cd32"
+                      size="medium"
+                      text="deleteing..."
+                      textColor="blue"
+                    />
+                  ) : (
+                    "Delete"
+                  )}
                 </button>
               )}
             </div>
@@ -131,12 +163,12 @@ const UpdateQuiz = () => {
 
         {/* Additional Fields */}
         <div className="grid grid-cols-2 gap-4">
-          {Object.keys(additionalFields).map((field) => (
+          {Object.keys(fetchedQuestions.options).map((field) => (
             <input
               key={field}
               type="text"
               placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
-              value={additionalFields[field]}
+              value={fetchedQuestions.options[field]}
               onChange={(e) =>
                 handleAdditionalFieldChange(field, e.target.value)
               }
@@ -149,7 +181,34 @@ const UpdateQuiz = () => {
           onClick={handleSubmit}
           className="w-full p-2 bg-blue-500 text-white rounded"
         >
-          Create Question
+          {isUpdateing ? (
+            <ThreeDot
+              variant="bounce"
+              color="#32cd32"
+              size="medium"
+              text="updateing..."
+              textColor="blue"
+            />
+          ) : (
+            "Update question"
+          )}
+        </button>
+        <button
+          onClick={handleDelete}
+          disabled={isLoading}
+          className="w-full p-2 bg-blue-500 text-white rounded"
+        >
+          {isLoading ? (
+            <ThreeDot
+              variant="bounce"
+              color="#32cd32"
+              size="medium"
+              text="deleteing..."
+              textColor="blue"
+            />
+          ) : (
+            "Delete question"
+          )}
         </button>
       </div>
     </div>
@@ -157,3 +216,15 @@ const UpdateQuiz = () => {
 };
 
 export default UpdateQuiz;
+
+export async function handleUpdateLoader({ req, params }) {
+  const questionId = params.id;
+
+  const response = await fetch(
+    `${process.env.REACT_APP_BACKEND_URL}/questions/${questionId}`
+  );
+
+  const resData = await response.json();
+
+  return resData;
+}

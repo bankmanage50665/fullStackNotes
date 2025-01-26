@@ -71,16 +71,18 @@ export async function action({ request, params }) {
     const resData = await res.json();
 
     console.log(resData);
-    
 
     if (!res.ok) {
       throw new Error(resData.message || "Field to loging user.");
     }
+
+    localStorage.setItem("id", resData.userId);
+    localStorage.setItem("token", resData.token);
   } catch (err) {
     throw json(
       { message: "Field to login  please try again later." },
       { status: 500 }
     );
   }
-  return redirect("/products");
+  return redirect("/quizs");
 }

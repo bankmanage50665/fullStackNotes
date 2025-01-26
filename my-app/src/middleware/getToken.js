@@ -1,7 +1,7 @@
 import { redirect } from "react-router-dom";
 
 export function userId() {
-  const userId = localStorage.getItem("userid");
+  const userId = localStorage.getItem("id");
   return userId;
 }
 

@@ -94,6 +94,8 @@ export async function action({ request, params }) {
     );
     const resData = await res.json();
 
+    console.log(resData);
+
     if (!res.ok) {
       throw new Error(resData.message || "Field to create user.");
     }
